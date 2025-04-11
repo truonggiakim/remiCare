@@ -1,3 +1,4 @@
+
 # remiCare
 Groovy Polar Bear
 
@@ -16,3 +17,6 @@ then just install the needed packages
 ```sh
 pip install -r requirements.txt
 ```
+
+# remiCare
+>>>>>>> 538ad24 (updates)
