@@ -19,7 +19,7 @@ class RemiCareApp(App):
         sm.add_widget(home)
         sm.current = 'home'
 
-        print("✅ HomeScreen added to ScreenManager.")
+        print("HomeScreen added to ScreenManager.")
         return sm
 
 if __name__ == '__main__':
