@@ -1,18 +1,18 @@
 from flask import Flask, jsonify, request
 from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
+#from zoneinfo import ZoneInfo
 from flask_sqlalchemy import SQLAlchemy
-import json 
+#import json 
 
 
 app = Flask(__name__)
-
+#intializes the database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 class Location(db.Model):
-
+    #this is the class for storing the locations
     id = db.Column(db.Integer, primary_key=True)
     watch_id = db.Column(db.String(50), nullable=False)
     lat = db.Column(db.Float, nullable=False)
@@ -23,6 +23,8 @@ class Location(db.Model):
         self.watch_id = watch_id
         self.lat = lat
         self.lon = lon
+        #needed because it wouldn't update the location without it. do not delete the first one
+        #it will cry like a bitch
         self.created_at = datetime.now(timezone.utc)
 
 with app.app_context():
@@ -49,6 +51,7 @@ def recieve_location():
     db.session.commit()
 
     all_locations = Location.query.all()
+    ##this is for debugging delete before the final version
     print("Current locations in the database:")
     for loc in all_locations:
         print(f"ID: {loc.id}, Watch ID: {loc.watch_id}, Latitude: {loc.lat}, Longitude: {loc.lon}, Created At: {loc.created_at}")
@@ -66,7 +69,10 @@ def recieve_location():
 def get_location():
     '''
     receives the location from the database
+    
+    no body expected
     '''
+    #gets the newest location
     newest_location = Location.query.order_by(Location.created_at.desc()).first()
 
     if newest_location:
@@ -81,8 +87,11 @@ def get_location():
             "message": "No locations found"
         }), 404
     
+    
 @app.route('/clear_locations', methods=['POST'])
 def clear_locations():
+    #pretty much just for testing. not needed in the final project becaue it only stores the last few locations
+    #can delete once we feel confident once the api is done, but no reason to. its not harming anyting
     '''
     Clears all the current locations from the database
     '''
