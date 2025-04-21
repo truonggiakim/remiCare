@@ -27,8 +27,27 @@ class Location(db.Model):
         #it will cry like a bitch
         self.created_at = datetime.now(timezone.utc)
 
+class Reminder(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    reminder = db.Column(db.String(120), nullable=False)
+    time = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
 with app.app_context():
     db.create_all()
+
+def reminder_to_dict(r):
+    return {
+        "id": r.id,
+        "reminder": r.reminder,
+        "time": r.time,
+        "created_at": r.created_at.isoformat(),
+    }
+
+###################################################################
+####################location#######################################
+##################################################################
 
 @app.route('/location', methods=['POST'])
 def recieve_location():
@@ -106,8 +125,54 @@ def clear_locations():
         # Rollback if there was an error
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
     
+
+###################################################################
+####################reminder#######################################
+##################################################################
+@app.route("/reminders", methods=["POST"])
+def add_reminder():
+    data = request.json or {}
+    reminder = data.get("reminder", "").strip()
+    time = data.get("time", "").strip()
+    if not reminder or not time:
+        return jsonify({
+            "error": "reminder and time required",
+        })
+
+    r = Reminder(reminder=reminder, time=time)
+    db.session.add(r)
+    db.session.commit()
+    return jsonify(reminder_to_dict(r)), 200
+
+@app.route("/reminders/<int:rem_id>", methods=["PUT"])
+def update_reminder(rem_id):
+    r = Reminder.query.get_or_404(rem_id)
+    data = request.json or {}
+    reminder = data.get("reminder", r.reminder).strip()
+    time = data.get("time", r.time).strip()
+    if not reminder or not {}:
+        return jsonify({
+            "error": "reminder and time required",
+        })
+    
+    r.reminder, r.time = reminder, time
+    db.session.commit()
+    return jsonify(reminder_to_dict(r), 200)
+
+@app.route("/reminders/<int:rem_id>", methods=["DELETE"])
+def delete_reminder(rem_id):
+    r = Reminder.query.get_or_404(rem_id)
+    db.session.delete(r)
+    db.session.commit()
+    return "", 204
+
+@app.route("/reminders", methods=["GET"])
+def list_reminders():
+    data = Reminder.query.order_by(Reminder.created_at).all()
+    return jsonify([reminder_to_dict(r) for r in data]), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port="8000")
 

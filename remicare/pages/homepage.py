@@ -10,7 +10,10 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.uix.widget import Widget
-
+from api_client import ApiClient
+from kivy.clock import mainthread
+import threading, time
+POLL_S=5
 
 class RoundedLabel(BoxLayout):
     def __init__(self, text, **kwargs):
@@ -34,6 +37,10 @@ class HomeScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.reminders = [] #create the list we are going to store the previous reminders in.
+        ApiClient.background(self.load_reminders)()
+
+
         with self.canvas.before:
             Color(0.85, 0.80, 1, 1)  # pastel purple
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -42,12 +49,12 @@ class HomeScreen(Screen):
         self.main_layout = BoxLayout(orientation='vertical', spacing=15, padding=[20, 20, 20, 15])
         self.main_layout.add_widget(self._make_label("RemiCare", 32, 50, color=(0.0, 0.290, 0.678, 1), bold=True))
         self.main_layout.add_widget(self._make_rounded_box_label("Today's reminder for your kids", 26, (1, 0.8, 0.9, 1)))
-
+        """these are the defaults reminders for testing
         self.reminders = [
             {"name": "Time to drink water", "time": "10:00 AM"},
             {"name": "Time to do your assignment", "time": "2:00 PM"},
             {"name": "Time to go to bed", "time": "8:30 PM"}
-        ]
+        ]"""
 
         header_row = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=40)
         header_row.add_widget(RoundedLabel("Reminders"))
@@ -154,7 +161,7 @@ class HomeScreen(Screen):
         for index, r in enumerate(self.reminders):
             row = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)
             reminder_btn = Button(
-                text=r["name"],
+                text=r["reminder"],
                 size_hint_x=0.7,
                 background_color=(1, 0.859, 0.886, 1),  # #ffdbe2
                 background_normal='',
@@ -204,9 +211,14 @@ class HomeScreen(Screen):
         save_btn = Button(text="Save", size_hint_y=None, height=40)
 
         def save_and_close(instance):
-            self.reminders[index]["name"] = input_box.text
-            self.refresh_grid()
-            popup.dismiss()
+            #self.reminders[index]["name"] = input_box.text
+            #self.refresh_grid()
+            #popup.dismiss()
+            name = input_box.text.strip()
+            if name:
+                rem = self.reminders[index]
+                ApiClient.background(self.api_update)(rem["id"], name, rem["time"])
+                popup.dismiss()
 
         save_btn.bind(on_press=save_and_close)
         popup_layout.add_widget(input_box)
@@ -224,8 +236,10 @@ class HomeScreen(Screen):
             name = name_input.text.strip()
             time = time_input.text.strip()
             if name and time:
-                self.reminders.append({"name": name, "time": time})
-                self.refresh_grid()
+                #self.reminders.append({"name": name, "time": time})
+                #self.refresh_grid()
+                #popup.dismiss()
+                ApiClient.background(self.api_add)(name,time)
                 popup.dismiss()
 
         save_btn.bind(on_press=add_and_close)
@@ -235,10 +249,54 @@ class HomeScreen(Screen):
         popup = Popup(title="New Reminder", content=popup_layout, size_hint=(0.8, 0.4))
         popup.open()
 
+    
+    def load_reminders(self):
+        data = ApiClient.list_reminders()
+        self.set_reminders(data)
+    
+    @mainthread
+    def set_reminders(self, data):
+        self.reminders = data
+        self.refresh_grid()
+
+    def api_add(self, name, time):
+        new = ApiClient.add_reminder(name,time)
+        self.set_reminders(self.reminders + [new])
+
+    def api_update(self, rem_id, name, time):
+        ApiClient.update_reminder(rem_id,name, time)
+        self.load_reminders()
+
+    def delete_reminder(self, index):
+        rem_id = self.reminders[index]["id"]
+        ApiClient.background(self.api_delete)(rem_id)
+
+    def api_delete(self, rem_id):
+        ApiClient.delete_reminder(rem_id)
+        self.load_reminders()
+
+    def on_enter(self):
+        self.stop_poll = False
+        threading.Thread(target=self.poll_loop, daemon=True).start()
+
+    def on_leave(self):
+        self._stop_poll = True
+    
+    def poll_loop(self):
+        while not self.stop_poll:
+            try:
+                data = ApiClient.list_reminders()
+                if data != self.reminders:
+                    self.load_reminders()
+            except Exception as excep:
+                print("reminders could not update", excep)
+            time.sleep(POLL_S)
+
     def go_home(self, instance):
         print("Navigating to Home")
 
     def go_location(self, instance):
+        self.manager.current = 'gps'
         print("Navigating to GPS")
 
     def go_settings(self, instance):
