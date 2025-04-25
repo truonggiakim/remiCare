@@ -5,6 +5,8 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.graphics import Color, Rectangle
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.image import Image
 
 class SignUpScreen(Screen):
     def __init__(self, **kwargs):
@@ -14,7 +16,7 @@ class SignUpScreen(Screen):
         root_layout = FloatLayout()
 
         with root_layout.canvas.before:
-            Color(0.7, 0.5, 0.9, 1)  # Soft purple background
+            Color(1.0, 0.859, 0.886, 1.0)  # Soft purple background
             self.rect = Rectangle(size=self.size, pos=self.pos)
         root_layout.bind(size=self._update_rect, pos=self._update_rect)
 
@@ -26,7 +28,23 @@ class SignUpScreen(Screen):
             size_hint=(0.9, 0.9),
             pos_hint={"center_x": 0.5, "center_y": 0.5}
         )
+        gif = Image(
+            source = 'assets/bird.gif',
+            size_hint =(None, None),
+            size =(120, 120),
+            anim_delay = 0.1,
+            allow_stretch = True,
+            keep_ratio = True,
+        )
+        gif_anchor = AnchorLayout(
+            anchor_x='center',   # center horizontally
+            anchor_y='center',   # center vertically within that 120px slice
+            size_hint=(1, None),
+            height=120
 
+        )
+        layout.add_widget(gif)
+        
         # Grouped headers to reduce spacing
         header_layout = BoxLayout(orientation='vertical', spacing=5)
         header_layout.add_widget(Label(text='Welcome to', font_size=80, bold=True, color=(1, 1, 1, 1)))
@@ -93,4 +111,4 @@ class SignUpScreen(Screen):
         print("Name:", self.name_input.text)
         print("Email:", self.email_input.text)
         print("Password:", self.password_input.text)
-        # self.manager.current = 'home'  # Example screen switch
+        self.manager.current = 'home'  # Example screen switch

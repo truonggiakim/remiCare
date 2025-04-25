@@ -207,7 +207,7 @@ class HomeScreen(Screen):
 
     def edit_reminder(self, index):
         popup_layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
-        input_box = TextInput(text=self.reminders[index]["name"], multiline=False)
+        input_box = TextInput(text=self.reminders[index]["reminder"], multiline=False)
         save_btn = Button(text="Save", size_hint_y=None, height=40)
 
         def save_and_close(instance):
@@ -298,6 +298,6 @@ class HomeScreen(Screen):
     def go_location(self, instance):
         self.manager.current = 'gps'
         print("Navigating to GPS")
-
+        
     def go_settings(self, instance):
-        print("Navigating to Settings")
+        self.manager.current = 'settings'

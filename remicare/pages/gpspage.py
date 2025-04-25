@@ -149,8 +149,8 @@ class GPSScreen(Screen):
         self.manager.current = 'home'
 
     def go_settings(self, *_):
-        #self.manager.current = 'settings'  # implement later
-        print("going to settings")
+        self.manager.current = 'settings'  # implement later
+    
 
 
     
