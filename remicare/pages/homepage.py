@@ -301,3 +301,5 @@ class HomeScreen(Screen):
         
     def go_settings(self, instance):
         self.manager.current = 'settings'
+        print("Navigating to Settings")
+        self.manager.current = 'settings'

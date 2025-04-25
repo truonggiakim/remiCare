@@ -91,14 +91,14 @@ class SignUpScreen(Screen):
         layout.add_widget(self.password_input)
 
         # Button
-        next_button = Button(
-            text='Next',
+        login_button = Button(
+            text='Log In',
             size_hint=(None, None),
             size=(150, 50),
             pos_hint={'center_x': 0.5}
         )
-        next_button.bind(on_press=self.go_next)
-        layout.add_widget(next_button)
+        login_button.bind(on_press=self.go_login)
+        layout.add_widget(login_button)
 
         root_layout.add_widget(layout)
         self.add_widget(root_layout)
@@ -107,7 +107,7 @@ class SignUpScreen(Screen):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
-    def go_next(self, instance):
+    def go_login(self, instance):
         print("Name:", self.name_input.text)
         print("Email:", self.email_input.text)
         print("Password:", self.password_input.text)
