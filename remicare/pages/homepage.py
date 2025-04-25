@@ -79,19 +79,20 @@ class HomeScreen(Screen):
         anchor.add_widget(add_btn)
         self.main_layout.add_widget(anchor)
 
-        view_btn = Button(
-            text="View All Reminders",
-            size_hint_y=None,
-            height=45,
-            background_color=(0.737, 0.745, 0.980, 1),  # light purple
-            color=(0, 0, 0, 1),
-            background_normal='',
-        )
-        with view_btn.canvas.before:
-            Color(0.737, 0.745, 0.980, 1)
-            self.view_rect = RoundedRectangle(radius=[20], pos=view_btn.pos, size=view_btn.size)
-            view_btn.bind(pos=self._update_view_btn, size=self._update_view_btn)
-        self.main_layout.add_widget(view_btn)
+         #view all reminder button
+        # view_btn = Button(
+        #     text="View All Reminders",
+        #     size_hint_y=None,
+        #     height=45,
+        #     background_color=(0.737, 0.745, 0.980, 1),  # light purple
+        #     color=(0, 0, 0, 1),
+        #     background_normal='',
+        # )
+        # with view_btn.canvas.before:
+        #     Color(0.737, 0.745, 0.980, 1)
+        #     self.view_rect = RoundedRectangle(radius=[20], pos=view_btn.pos, size=view_btn.size)
+        #     view_btn.bind(pos=self._update_view_btn, size=self._update_view_btn)
+        # self.main_layout.add_widget(view_btn)
 
         float_layout = FloatLayout()
         float_layout.add_widget(self.main_layout)
