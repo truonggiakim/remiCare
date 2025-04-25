@@ -75,11 +75,11 @@ class GPSScreen(Screen):
 
         #back button
         back_btn = Button(
-            text="<",
+            text="←",
             size_hint=(None, None),
             size=(50, 40),
             pos_hint={"x": 0.02, "top": 0.98},
-            background_color=(0,0,0,0),
+            background_color=(0.8, 0.8, 1, 1),
             color=(0, 0, 0, 1)
         )
         back_btn.bind(on_press=self.go_back_home)
