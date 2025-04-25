@@ -185,9 +185,9 @@ class HomeScreen(Screen):
         hours = [f"{i:02}" for i in range(1, 13)]
         minutes = [f"{i:02}" for i in range(0, 60, 5)]
         meridian = ["AM", "PM"]
-        hour_spin = Spinner(text="10", values=hours)
-        minute_spin = Spinner(text="00", values=minutes)
-        meridian_spin = Spinner(text="AM", values=meridian)
+        hour_spin = Spinner(text=self.reminders[index]['time'][:2], values=hours)
+        minute_spin = Spinner(text= self.reminders[index]['time'][3:5], values=minutes)
+        meridian_spin = Spinner(text=self.reminders[index]['time'][6:8], values=meridian)
         time_row = BoxLayout()
         time_row.add_widget(hour_spin)
         time_row.add_widget(minute_spin)
@@ -229,13 +229,30 @@ class HomeScreen(Screen):
 
     def add_reminder_popup(self, instance):
         popup_layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
+
+
         name_input = TextInput(hint_text="Reminder name", multiline=False)
-        time_input = TextInput(hint_text="Time (e.g. 5:00 PM)", multiline=False)
+        popup_layout.add_widget(name_input)
+        hours   = [f"{i:02}" for i in range(1, 13)]
+        minutes = [f"{i:02}" for i in range(0, 60, 5)]
+        meridian= ["AM", "PM"]
+
+        hour_spin     = Spinner(text=hours[0],   values=hours)
+        minute_spin   = Spinner(text=minutes[0], values=minutes)
+        meridian_spin = Spinner(text=meridian[0],values=meridian)
+
+        time_row = BoxLayout(spacing=5, size_hint_y=None, height=40)
+        time_row.add_widget(hour_spin)
+        time_row.add_widget(minute_spin)
+        time_row.add_widget(meridian_spin)
+        popup_layout.add_widget(time_row)
+
+
         save_btn = Button(text="Add", size_hint_y=None, height=40)
 
         def add_and_close(btn):
             name = name_input.text.strip()
-            time = time_input.text.strip()
+            time = f"{hour_spin.text}:{minute_spin.text} {meridian_spin.text}"
             if name and time:
                 #self.reminders.append({"name": name, "time": time})
                 #self.refresh_grid()
@@ -244,8 +261,6 @@ class HomeScreen(Screen):
                 popup.dismiss()
 
         save_btn.bind(on_press=add_and_close)
-        popup_layout.add_widget(name_input)
-        popup_layout.add_widget(time_input)
         popup_layout.add_widget(save_btn)
         popup = Popup(title="New Reminder", content=popup_layout, size_hint=(0.8, 0.4))
         popup.open()
