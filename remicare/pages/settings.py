@@ -30,15 +30,14 @@ class SettingsScreen(Screen):
 
         # General Section
         self.layout.add_widget(Label(text="GENERAL", font_size=16, size_hint_y=None, height=30, color=(0.3, 0.3, 0.3, 1)))
-        self.layout.add_widget(self._settings_item("👤", "Account", self.show_account_details))
-        self.layout.add_widget(self._settings_item("🔔", "Notifications", self.show_notification_popup))
-        self.layout.add_widget(self._settings_item("🚪", "Logout", self.logout_and_redirect))
-        self.layout.add_widget(self._settings_item("🗑️", "Delete account", self.show_placeholder))
+        self.layout.add_widget(self._settings_item("Account", self.show_account_details))
+        self.layout.add_widget(self._settings_item("Notifications", self.show_notification_popup))
+        self.layout.add_widget(self._settings_item("Logout", self.logout_and_redirect))
 
         # Feedback Section
         self.layout.add_widget(Label(text="FEEDBACK", font_size=16, size_hint_y=None, height=30, color=(0.3, 0.3, 0.3, 1)))
-        self.layout.add_widget(self._settings_item("⚠️", "Report a bug", self.show_placeholder))
-        self.layout.add_widget(self._settings_item("📨", "Send feedback", self.show_placeholder))
+        self.layout.add_widget(self._settings_item("Report a bug", self.show_placeholder))
+        self.layout.add_widget(self._settings_item("Send feedback", self.show_placeholder))
 
         scroll.add_widget(self.layout)
         
@@ -47,11 +46,12 @@ class SettingsScreen(Screen):
         float_container.add_widget(scroll)
 
         back_btn = Button(
-            text="←",
+            text="<",
             size_hint=(None, None),
             size=(50, 40),
-            pos_hint={"x": 0.02, "top": 0.98},  # Top-left corner with slight margin
-            background_color=(0.8, 0.8, 1, 1),
+            pos_hint={"x": 0.02, "top": 0.98},
+            background_normal='',
+            background_color=(1,1,1,1),
             color=(0, 0, 0, 1)
             )
         back_btn.bind(on_press=self.go_back_home)
@@ -59,19 +59,17 @@ class SettingsScreen(Screen):
         self.add_widget(float_container)
 
 
-    def _settings_item(self, icon, label_text, on_press_action):
+    def _settings_item(self, label_text, on_press_action):
         row = BoxLayout(orientation='horizontal', size_hint_y=None, height=45, padding=[10, 5, 10, 5], spacing=10)
         with row.canvas.before:
             Color(1, 1, 1, 1)
             row.bg = RoundedRectangle(pos=row.pos, size=row.size, radius=[10])
         row.bind(pos=self._update_bg, size=self._update_bg)
-
-        icon_label = Label(text=icon, font_size=20, size_hint_x=0.1, color=(0, 0, 0, 1))
+  
         text_label = Button(text=label_text, font_size=16, halign='left', valign='middle',
                             color=(0, 0, 0, 1), background_normal='', background_color=(0, 0, 0, 0))
         text_label.bind(on_press=on_press_action)
 
-        row.add_widget(icon_label)
         row.add_widget(text_label)
         return row
 
