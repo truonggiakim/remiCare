@@ -195,8 +195,9 @@ class HomeScreen(Screen):
         save_btn = Button(text="Set Time", size_hint_y=None, height=40)
 
         def save_and_close(instance):
-            self.reminders[index]["time"] = f"{hour_spin.text}:{minute_spin.text} {meridian_spin.text}"
-            self.refresh_grid()
+            new_time = f"{hour_spin.text}:{minute_spin.text} {meridian_spin.text}"
+            rem = self.reminders[index]
+            ApiClient.background(self.api_update)(rem["id"], rem["reminder"], new_time)
             popup.dismiss()
 
         save_btn.bind(on_press=save_and_close)

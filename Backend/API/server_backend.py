@@ -151,7 +151,8 @@ def update_reminder(rem_id):
     data = request.json or {}
     reminder = data.get("reminder", r.reminder).strip()
     time = data.get("time", r.time).strip()
-    if not reminder or not {}:
+    print(f"Put /reminders/{rem_id} payload: {request.json}")
+    if not reminder or not time:
         return jsonify({
             "error": "reminder and time required",
         })
