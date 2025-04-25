@@ -72,6 +72,18 @@ class GPSScreen(Screen):
         content.height = 700
         content.pos_hint = {"top": 1}
 
+
+        #back button
+        back_btn = Button(
+            text="←",
+            size_hint=(None, None),
+            size=(50, 40),
+            pos_hint={"x": 0.02, "top": 0.98},
+            background_color=(0.8, 0.8, 1, 1),
+            color=(0, 0, 0, 1)
+        )
+        back_btn.bind(on_press=self.go_back_home)
+        root.add_widget(back_btn)
         self.add_widget(root)
 
     #--pulling the gps data---
@@ -140,9 +152,6 @@ class GPSScreen(Screen):
                      color=(0, 0, 0, 1), size_hint_y=None, height=50)
         btn.bind(on_press=cb)
         return btn
-    
-
-    
 
     # --- screen switches ---
     def go_home(self, *_):
@@ -151,6 +160,11 @@ class GPSScreen(Screen):
     def go_settings(self, *_):
         #self.manager.current = 'settings'  # implement later
         print("going to settings")
+
+    #back button to homescreen
+
+    def go_back_home(self, instance):
+        self.manager.current = 'home'
 
 
     

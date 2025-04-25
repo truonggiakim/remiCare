@@ -6,7 +6,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
 from kivy.uix.switch import Switch
 from kivy.graphics import Color, Rectangle, RoundedRectangle
-
+from kivy.uix.floatlayout import FloatLayout
 
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
@@ -32,7 +32,7 @@ class SettingsScreen(Screen):
         self.layout.add_widget(Label(text="GENERAL", font_size=16, size_hint_y=None, height=30, color=(0.3, 0.3, 0.3, 1)))
         self.layout.add_widget(self._settings_item("👤", "Account", self.show_account_details))
         self.layout.add_widget(self._settings_item("🔔", "Notifications", self.show_notification_popup))
-        self.layout.add_widget(self._settings_item("🚪", "Logout", self.show_placeholder))
+        self.layout.add_widget(self._settings_item("🚪", "Logout", self.logout_and_redirect))
         self.layout.add_widget(self._settings_item("🗑️", "Delete account", self.show_placeholder))
 
         # Feedback Section
@@ -41,7 +41,23 @@ class SettingsScreen(Screen):
         self.layout.add_widget(self._settings_item("📨", "Send feedback", self.show_placeholder))
 
         scroll.add_widget(self.layout)
-        self.add_widget(scroll)
+        
+        #BACK BUTTON ON THE TOP LEFT CORNER
+        float_container = FloatLayout()
+        float_container.add_widget(scroll)
+
+        back_btn = Button(
+            text="←",
+            size_hint=(None, None),
+            size=(50, 40),
+            pos_hint={"x": 0.02, "top": 0.98},  # Top-left corner with slight margin
+            background_color=(0.8, 0.8, 1, 1),
+            color=(0, 0, 0, 1)
+            )
+        back_btn.bind(on_press=self.go_back_home)
+        float_container.add_widget(back_btn)
+        self.add_widget(float_container)
+
 
     def _settings_item(self, icon, label_text, on_press_action):
         row = BoxLayout(orientation='horizontal', size_hint_y=None, height=45, padding=[10, 5, 10, 5], spacing=10)
@@ -83,6 +99,11 @@ class SettingsScreen(Screen):
             self.account_box.add_widget(Label(text="Username: remiUser01", color=(0, 0, 0, 1)))
             index = self.layout.children.index(self._find_item_by_text("Account"))
             self.layout.add_widget(self.account_box, index=index)
+    
+    def logout_and_redirect(self, instance):
+    # Optional: clear any app state here (e.g., reminders, tokens)
+        print("🔒 Logging out and returning to signup screen...")
+        self.manager.current = 'signup'
 
     def _find_item_by_text(self, text):
         for widget in self.layout.children:
@@ -106,3 +127,9 @@ class SettingsScreen(Screen):
     def _update_rect(self, instance, value):
         self.rect.size = instance.size
         self.rect.pos = instance.pos
+
+    #back button
+    def go_back_home(self, instance):
+        self.manager.current = 'home'
+    
+    
