@@ -10,10 +10,25 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.uix.widget import Widget
+from kivy.uix.button import Button
+from kivy.graphics import Color, RoundedRectangle
 from api_client import ApiClient
 from kivy.clock import mainthread
 import threading, time
 POLL_S=5
+
+class RoundedButton(Button):
+     def __init__(self, bg_color=(0.7,0.7,1,1), radius =12, **kwargs):
+          super().__init__(background_normal='', background_color=bg_color, **kwargs)
+          self._radius = radius
+          with self.canvas.before:
+               Color(*bg_color)
+               self._bg = RoundedRectangle(radius=[radius, radius, radius, radius], pos=self.pos, size=self.size)
+               self.bind(pos=self._update_bg, size=self._update_bg)
+
+     def _update_bg(self,instance,_):
+        self._bg.pos = instance.pos
+        self._bg.size = instance.size
 
 class RoundedLabel(BoxLayout):
     def __init__(self, text, **kwargs):
@@ -42,13 +57,13 @@ class HomeScreen(Screen):
 
 
         with self.canvas.before:
-            Color(0.85, 0.80, 1, 1)  # pastel purple
+            Color(0.95, 0.95, 1, 1)  # pastel purple
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self._update_rect, pos=self._update_rect)
 
         self.main_layout = BoxLayout(orientation='vertical', spacing=15, padding=[20, 20, 20, 15])
         self.main_layout.add_widget(self._make_label("RemiCare", 32, 50, color=(0.0, 0.290, 0.678, 1), bold=True))
-        self.main_layout.add_widget(self._make_rounded_box_label("Today's reminder for your kids", 26, (1, 0.8, 0.9, 1)))
+        self.main_layout.add_widget(self._make_rounded_box_label("Today's reminder for your kids", 26, (0.7, 0.7, 1, 1)))
         """these are the defaults reminders for testing
         self.reminders = [
             {"name": "Time to drink water", "time": "10:00 AM"},
@@ -68,10 +83,10 @@ class HomeScreen(Screen):
 
         add_btn = Button(
             text="+",
-            font_size=26,
+            font_size=30,
             size_hint=(None, None),
             size=(50, 50),
-            background_color=(0.286, 0.329, 0.745, 1),  # #4954be
+            background_color=(0.7, 0.7, 1, 1),  # #4954be
             color=(1, 1, 1, 1),
             on_press=self.add_reminder_popup
         )
@@ -93,14 +108,35 @@ class HomeScreen(Screen):
         #     self.view_rect = RoundedRectangle(radius=[20], pos=view_btn.pos, size=view_btn.size)
         #     view_btn.bind(pos=self._update_view_btn, size=self._update_view_btn)
         # self.main_layout.add_widget(view_btn)
-
+    
         float_layout = FloatLayout()
         float_layout.add_widget(self.main_layout)
 
-        nav_bar = BoxLayout(orientation='horizontal', size_hint=(1, None), height=50, spacing=10, pos_hint={'x': 0, 'y': 0})
-        nav_bar.add_widget(self._make_button("Home", self.go_home))
-        nav_bar.add_widget(self._make_button("GPS", self.go_location))
-        nav_bar.add_widget(self._make_button("Settings", self.go_settings))
+        nav_bar = BoxLayout(orientation='horizontal', 
+                            size_hint=(1, None), 
+                            height=50, 
+                            spacing=10, 
+                            pos_hint={'x': 0, 'y': 0}
+                            )
+        nav_bar.add_widget(RoundedButton(
+                         text="Home",
+                        on_press=self.go_home,
+                        bg_color=(0.7, 0.7, 1, 1),
+                        radius=15
+))
+        nav_bar.add_widget(RoundedButton(
+            text="GPS",
+            on_press=self.go_location,
+            bg_color=(0.7, 0.7, 1, 1),
+            radius=15
+))
+        nav_bar.add_widget(RoundedButton(
+             text="Settings",
+            on_press=self.go_settings,
+            bg_color=(0.7, 0.7, 1, 1),
+             radius=15
+))
+
         float_layout.add_widget(nav_bar)
 
         self.main_layout.size_hint = (1, None)

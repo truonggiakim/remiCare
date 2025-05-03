@@ -26,7 +26,7 @@ class GPSScreen(Screen):
 
         # ---------- purple background ----------
         with self.canvas.before:
-            Color(0.85, 0.80, 1, 1)          # same pastel purple
+            Color(0.95, 0.95, 1, 1)          # same pastel purple
             self.rect = Rectangle(pos=self.pos, size=self.size)
         self.bind(size=self._update_rect, pos=self._update_rect)
 
@@ -38,12 +38,13 @@ class GPSScreen(Screen):
         # headline
         title = Label(text="RemiCare-GPS", bold=True,
                       font_size=32, size_hint_y=None, height=50,
+                      halign='center', valign = 'middle',
                       color=(0.0, 0.290, 0.678, 1))
         title.bind(size=title.setter("text_size"))
         content.add_widget(title)
 
         # subtitle
-        subtitle = self._rounded_label("Child-tracker dashboard",
+        subtitle = self._rounded_label("Child-tracker Dashboard",
                                        font_size=26,
                                        bg=(1, 0.8, 0.9, 1))
         content.add_widget(subtitle)
@@ -149,7 +150,7 @@ class GPSScreen(Screen):
 
     def _nav_btn(self, text, cb):
         btn = Button(text=text, background_color=(0.7, 0.7, 1, 1),
-                     color=(0, 0, 0, 1), size_hint_y=None, height=50)
+                     color=(0.7, 0.7, 1, 1), size_hint_y=None, height=50)
         btn.bind(on_press=cb)
         return btn
 

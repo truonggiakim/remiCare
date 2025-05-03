@@ -47,11 +47,11 @@ class SignUpScreen(Screen):
         
         # Grouped headers to reduce spacing
         header_layout = BoxLayout(orientation='vertical', spacing=5)
-        header_layout.add_widget(Label(text='Welcome to', font_size=80, bold=True, color=(1, 1, 1, 1)))
-        header_layout.add_widget(Label(text='RemiCare', font_size=60, bold=True, italic=True, color=(1, 1, 1, 1)))
+        header_layout.add_widget(Label(text='Welcome to', font_size=65, bold=True, color=(0.0, 0.290, 0.678, 1)))
+        header_layout.add_widget(Label(text='RemiCare', font_size=65, bold=True, color=(0.0, 0.290, 0.678, 1)))
         layout.add_widget(header_layout)
 
-        layout.add_widget(Label(text='Sign Up', font_size=22, bold=True, italic=True, color=(1, 1, 1, 1)))
+        layout.add_widget(Label(text='Sign Up', font_size=35, bold=True, italic=True, color=(0.0, 0.290, 0.678, 1)))
 
         # Styled input fields
         self.name_input = TextInput(
