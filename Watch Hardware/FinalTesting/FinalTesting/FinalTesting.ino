@@ -16,6 +16,8 @@ const char* BASE_URL = "http://192.168.1.69:8000";
 static const int GPS_RX    = 22;
 static const int GPS_TX    = 27;
 static const long GPS_BAUD = 9600;
+const uint16_t HOLD_THRESHOLD = 1000;  // ms
+
 
 // TFT (ST7789‑compatible NV3030B)
 #define TFT_CS   18
@@ -42,7 +44,7 @@ uint32_t lastFetch = 0;
 uint8_t  lastDay   = 0xFF;
 
 // Central Time offset UTC–6
-const int8_t CT_OFF = -6;
+const int8_t CT_OFF = -5;
 
 // ——— GPS ———
 HardwareSerial gpsSerial(1);
@@ -210,18 +212,87 @@ void sendLocation() {
   http.end();
 }
 
+bool waitForButtonPressAndRelease(bool &wasHeld) {
+  // --- wait for initial press ---
+  while (digitalRead(BUTTON_PIN) == HIGH) {
+    delay(10);         // debounce
+  }
+  uint32_t start = millis();
+
+  // --- wait until release or threshold ---
+  while (digitalRead(BUTTON_PIN) == LOW) {
+    if (millis() - start >= HOLD_THRESHOLD) {
+      wasHeld = true;  // long press detected
+      break;
+    }
+    delay(10);
+  }
+
+  // --- now wait for the physical release if we broke early ---
+  while (digitalRead(BUTTON_PIN) == LOW) {
+    delay(10);
+  }
+
+  // if we never hit the threshold before release, it was a tap
+  if (!wasHeld && (millis() - start < HOLD_THRESHOLD)) {
+    wasHeld = false;
+  }
+  return true;
+}
+
 void checkReminders(uint16_t now) {
-  static uint32_t lastFireTime = 0;
   for (auto &r : reminders) {
     if (!r.fired && now >= r.minuteOfDay) {
       r.fired = true;
-      Serial.printf("🔥 Fired [%u] %s\n", r.id, r.text.c_str());
       drawReminder(r.text);
-      while (digitalRead(BUTTON_PIN) == HIGH) {
-        tone(SPEAKER_PIN, 2000, 10);
-        delay(10);
+
+      tone(SPEAKER_PIN, 2000);
+
+      bool held = false;
+      waitForButtonPressAndRelease(held);
+
+      noTone(SPEAKER_PIN);
+
+      if (held) {
+        // —— LONG PRESS: refresh and show all pending ones —— 
+        fetchReminders();
+        lastFetch = millis();
+        for (auto &nr : reminders) {
+          if (!nr.fired) {
+            nr.fired = true;
+            drawReminder(nr.text);
+
+
+            // wait for a tap on each one
+            tone(SPEAKER_PIN, 2000);
+            bool dummy;
+            waitForButtonPressAndRelease(dummy);
+            noTone(SPEAKER_PIN);
+          }
+        }
       }
-      lastFireTime = millis();
+      // in both cases (tap or hold) we return to clock
+      tft.fillScreen(ST77XX_BLACK);
+
+      // then draw the time *regardless* of prevH/prevM
+      // (duplicate the core of drawTime here)
+      uint8_t h = toCentral(gps.time.hour()), m = gps.time.minute();
+      char buf[6];
+      snprintf(buf, sizeof(buf), "%02u:%02u", h, m);
+
+      tft.setTextColor(ST77XX_WHITE);
+      tft.setTextSize(4);
+
+      int16_t x1, y1;
+      uint16_t w, h_text;
+      tft.getTextBounds(buf, 0, 0, &x1, &y1, &w, &h_text);
+
+      int x_centered = (240 - w) / 2 + 25;
+      int y_centered = (280 - h_text) / 2 - 10;
+
+      tft.setCursor(x_centered, y_centered);
+      tft.print(buf);
+      return;
     }
   }
 }
@@ -239,16 +310,38 @@ void drawReminder(const String &msg) {
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextSize(3);
-  tft.setCursor(10, 10); tft.print("Reminder:");
-  tft.setTextSize(2);
-  tft.setCursor(10, 60); tft.print(msg);
+
+  int16_t x1, y1;
+  uint16_t w, h;
+  tft.getTextBounds(msg, 0, 0, &x1, &y1, &w, &h);
+
+  int x_centered = (240 - w) / 2;
+  int y_centered = (280 - h) / 2;
+
+  tft.setCursor(x_centered, y_centered);
+  tft.print(msg);
 }
 
 void drawTime(uint8_t h, uint8_t m) {
+  static uint8_t prevH = 255, prevM = 255;
+  if (h == prevH && m == prevM) return;  // ⏱️ Only update if changed
+
+  prevH = h; prevM = m;
+
   char buf[6];
   snprintf(buf, sizeof(buf), "%02u:%02u", h, m);
+
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextSize(4);
-  tft.setCursor(10, 40); tft.print(buf);
+  
+  int16_t x1, y1;
+  uint16_t w, h_text;
+  tft.getTextBounds(buf, 0, 0, &x1, &y1, &w, &h_text);
+
+  int x_centered = (240 - w) / 2 + 25;
+  int y_centered = (280 - h_text) / 2 - 10;
+
+  tft.setCursor(x_centered, y_centered);
+  tft.print(buf);
 }
